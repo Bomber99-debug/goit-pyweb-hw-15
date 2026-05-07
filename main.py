@@ -96,5 +96,4 @@ def dispatch_command(args: Namespace):
 if __name__ == '__main__':
     parser = build_parser()
     args = parser.parse_args()
-    result = dispatch_command(args)
-    print(args)
+    dispatch_command(args)
