@@ -1,92 +1,93 @@
 from argparse import Namespace
 from cli_parser import build_parser
 
-import create
-import my_select
-from seeds import seed_db
 
-def dispatch_command(args: Namespace):
-    if args.auto:
+def dispatch_command(arguments: Namespace):
+    import create
+    import my_select
+
+    if arguments.auto:
         create.main()
-    elif args.init_docker:
-        create.docker_create_container(args.container_name)
-    elif args.edit_alembic:
+    elif arguments.init_docker:
+        create.docker_create_container(arguments.container_name)
+    elif arguments.edit_alembic:
         create.edit_setting_alembic()
-    elif args.create_migration:
+    elif arguments.create_migration:
         create.create_migrate_db()
-    elif args.upgrade_db:
+    elif arguments.upgrade_db:
         create.application_migrate_db()
-    elif args.insert_db:
+    elif arguments.insert_db:
         create.insert_db()
-    elif args.run_queries:
+    elif arguments.run_queries:
         create.get_db()
 
-    elif args.student_max_avg_grade:
+    elif arguments.student_max_avg_grade:
         my_select.get_student_max_avg_grade()
-    elif args.student_subject_avg_grade:
+    elif arguments.student_subject_avg_grade:
         my_select.get_student_subject_avg_grade()
-    elif args.group_subject_avg_grade:
+    elif arguments.group_subject_avg_grade:
         my_select.get_group_subject_avg_grade()
-    elif args.avg_grade:
+    elif arguments.avg_grade:
         my_select.get_avg_grade()
-    elif args.teacher_subject:
+    elif arguments.teacher_subject:
         my_select.get_teacher_subject()
-    elif args.student_group:
+    elif arguments.student_group:
         my_select.get_student_group()
-    elif args.group_student_subject_grade:
+    elif arguments.group_student_subject_grade:
         my_select.get_group_student_subject_grade()
-    elif args.teacher_subject_avg_grade:
+    elif arguments.teacher_subject_avg_grade:
         my_select.get_teacher_subject_avg_grade()
-    elif args.student_subject:
+    elif arguments.student_subject:
         my_select.get_student_subject()
-    elif args.student_subject_teacher:
+    elif arguments.student_subject_teacher:
         my_select.get_student_subject_teacher()
-    elif args.teacher_avg_grade:
+    elif arguments.teacher_avg_grade:
         my_select.get_student_teacher_avg_grade()
-    elif args.group_student_subject_date:
+    elif arguments.group_student_subject_date:
         my_select.get_group_student_subject_date()
 
-    elif args.entity is not None:
-        entity, action = args.entity, args.action
+    elif arguments.entity is not None:
+        from seeds import seed_db
+        entity, action = arguments.entity, arguments.action
         match (entity, action):
             case ("group", "create"):
-                seed_db.create_group(args.title)
+                seed_db.create_group(arguments.title)
             case ("group", "delete"):
-                seed_db.remove_group(args.id)
+                seed_db.remove_group(arguments.id)
             case ("group", "edit"):
-                seed_db.update_group(args.id, args.title)
+                seed_db.update_group(arguments.id, arguments.title)
 
             case ("student", "create"):
-                seed_db.create_student(args.first_name, args.last_name, args.group_id)
+                seed_db.create_student(arguments.first_name, arguments.last_name, arguments.group_id)
             case ("student", "delete"):
-                seed_db.remove_student(args.id)
+                seed_db.remove_student(arguments.id)
             case ("student", "edit"):
-                seed_db.update_student(args.first_name, args.last_name, args.id)
+                seed_db.update_student(arguments.first_name, arguments.last_name, arguments.id)
             case ("student", "edit_group"):
-                seed_db.update_group_student(args.group_id, args.id)
+                seed_db.update_group_student(arguments.group_id, arguments.id)
 
             case ("teacher", "create"):
-                seed_db.create_teacher(args.first_name, args.last_name)
+                seed_db.create_teacher(arguments.first_name, arguments.last_name)
             case ("teacher", "delete"):
-                seed_db.remove_teacher(args.id)
+                seed_db.remove_teacher(arguments.id)
             case ("teacher", "edit"):
-                seed_db.update_teacher(args.first_name, args.last_name, args.id)
+                seed_db.update_teacher(arguments.first_name, arguments.last_name, arguments.id)
 
             case ("subject", "create"):
-                seed_db.create_subject(args.title, args.teacher_id)
+                seed_db.create_subject(arguments.title, arguments.teacher_id)
             case ("subject", "delete"):
-                seed_db.remove_subject(args.id)
+                seed_db.remove_subject(arguments.id)
             case ("subject", "edit"):
-                seed_db.update_subject(args.title, args.id)
+                seed_db.update_subject(arguments.title, arguments.id)
             case ("subject", "edit_teacher"):
-                seed_db.update_teacher_subject(args.teacher_id, args.id)
+                seed_db.update_teacher_subject(arguments.teacher_id, arguments.id)
 
             case ("grade", "create"):
-                seed_db.create_grade(args.student_id, args.subject_id, args.grade, args.grade_date)
+                seed_db.create_grade(arguments.student_id, arguments.subject_id, arguments.grade, arguments.grade_date)
             case ("grade", "delete"):
-                seed_db.remove_grade(args.id)
+                seed_db.remove_grade(arguments.id)
             case ("grade", "edit"):
-                seed_db.update_grade(args.id, args.grade, args.grade_date)
+                seed_db.update_grade(arguments.id, arguments.grade, arguments.grade_date)
             case _:
                 parser.print_help()
     else:
