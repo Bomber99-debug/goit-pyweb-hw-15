@@ -102,7 +102,7 @@ def insert_teachers(number_teacher: int) -> None:
     print(f"Вчителів створено: {num}")
 
 
-def create_teacher(first_name: str, last_name: str, subject_id: int):
+def create_teacher(first_name: str, last_name: str):
     teacher = Teacher(
         first_name=first_name,
         last_name=last_name,

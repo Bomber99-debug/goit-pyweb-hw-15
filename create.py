@@ -64,7 +64,7 @@ def init_alembic() -> bool:
     return True
 
 
-def edit_setting_alembic(dir_file: str) -> None:
+def edit_setting_alembic(dir_file: str = DIR_END_ALEMBIC) -> None:
     print("Створення міграції у базі даних")
     try:
         source = Path(__file__).parent.joinpath('setting').joinpath('env.py')
@@ -103,8 +103,7 @@ def application_migrate_db():
 def insert_db() -> None:
     print("Створення фейкових даних і наповнення бази даних")
     file = Path(__file__).parent.joinpath('seeds').joinpath('seed_db.py')
-    result = subprocess.run([sys.executable, file])
-    result_err(result)
+    subprocess.run([sys.executable, file])
 
 
 def get_db() -> None:

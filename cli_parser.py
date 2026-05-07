@@ -88,6 +88,7 @@ def build_parser() -> argparse.ArgumentParser:
     create_student = student_actions.add_parser("create", help=STUDENT_CREATE_HELP)
     create_student.add_argument("first_name", type=str)
     create_student.add_argument("last_name", type=str)
+    create_student.add_argument("group_id", type=int)
 
     delete_student = student_actions.add_parser("delete", help=STUDENT_DELETE_HELP)
     delete_student.add_argument("id", type=int)

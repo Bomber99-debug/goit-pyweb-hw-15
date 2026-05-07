@@ -9,9 +9,9 @@ def dispatch_command(args: Namespace):
     if args.auto:
         create.main()
     elif args.init_docker:
-        create.docker_create_container()
+        create.docker_create_container(args.container_name)
     elif args.edit_alembic:
-        create.edit_setting_alembic(args.container_name)
+        create.edit_setting_alembic()
     elif args.create_migration:
         create.create_migrate_db()
     elif args.upgrade_db:
@@ -57,7 +57,7 @@ def dispatch_command(args: Namespace):
                 seed_db.update_group(args.id, args.title)
 
             case ("student", "create"):
-                seed_db.create_student(args.first_name, args.last_name)
+                seed_db.create_student(args.first_name, args.last_name, args.group_id)
             case ("student", "delete"):
                 seed_db.remove_student(args.id)
             case ("student", "edit"):
