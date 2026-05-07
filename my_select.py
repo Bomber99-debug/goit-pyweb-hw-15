@@ -371,7 +371,7 @@ def get_group_student_subject_date(group_id: int = 2, subject_id: int = 4) -> No
     print(output)
 
 
-if __name__ == "__main__":
+def main():
     print("1. Знайти 5 студентів із найбільшим середнім балом з усіх предметів.")
     get_student_max_avg_grade()
 
@@ -407,3 +407,6 @@ if __name__ == "__main__":
 
     print("12. Оцінки студентів у певній групі з певного предмета на останньому занятті.")
     get_group_student_subject_date()
+
+if __name__ == '__main__':
+    main()

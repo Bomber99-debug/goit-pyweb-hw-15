@@ -2,12 +2,15 @@ import subprocess
 import sys
 import socket
 
+import my_select
+
+from seeds import seed_db
+
 from time import sleep
 from pathlib import Path
 from shutil import copy2
 
 DIR_END_ALEMBIC = Path(__file__).parent.joinpath("alembic")
-
 
 
 def docker_init() -> None:
@@ -34,8 +37,9 @@ def docker_create_container(container_name: str = 'dev-pyweb-15') -> None:
     docker_init()  # Перевірка чи встановлений Docker і запущений
 
     print("Створення контейнера")
-    file_name_db = subprocess.run(['docker', 'ps', '-a', '--filter', f'name={container_name}', '--format', '{{.Names}}'],
-                                  capture_output=True, text=True)
+    file_name_db = subprocess.run(
+        ['docker', 'ps', '-a', '--filter', f'name={container_name}', '--format', '{{.Names}}'],
+        capture_output=True, text=True)
 
     if container_name in file_name_db.stdout.splitlines():
         print(f"Контейнер з {container_name} вже існує, задайте іншу назву")
@@ -64,8 +68,7 @@ def init_alembic() -> bool:
     return True
 
 
-def edit_setting_alembic(dir_file: str = DIR_END_ALEMBIC) -> None:
-    print("Створення міграції у базі даних")
+def edit_setting_alembic(dir_file: Path) -> None:
     try:
         source = Path(__file__).parent.joinpath('setting').joinpath('env.py')
         copy2(source, dir_file)
@@ -77,7 +80,8 @@ def edit_setting_alembic(dir_file: str = DIR_END_ALEMBIC) -> None:
         print(err)
 
 
-def init_migrate_db(dir_end: str) -> None:
+def init_migrate_db(dir_end: Path = DIR_END_ALEMBIC) -> None:
+    print("Створення міграції у базі даних")
     destination = Path(__file__).parent.joinpath(dir_end).joinpath('env.py')
     if not destination.exists():
         print('Ініціалізація alembic')
@@ -102,15 +106,12 @@ def application_migrate_db():
 
 def insert_db() -> None:
     print("Створення фейкових даних і наповнення бази даних")
-    file = Path(__file__).parent.joinpath('seeds').joinpath('seed_db.py')
-    subprocess.run([sys.executable, file])
+    seed_db.main()
 
 
 def get_db() -> None:
     print("Запити до БД")
-    file = Path(__file__).parent.joinpath('my_select.py')
-    result = subprocess.run(file, capture_output=True, text=True)
-    result_err(result)
+    my_select.main()
 
 
 def result_err(err) -> None:
@@ -124,7 +125,7 @@ def main() -> None:
     docker_create_container()  # Створення контейнера
 
     if init_alembic():
-        edit_setting_alembic(DIR_END_ALEMBIC)  # Створення міграції у базі даних
+        init_migrate_db(DIR_END_ALEMBIC)  # Створення міграції у базі даних
 
         create_migrate_db()  # Створення міграцій
 
