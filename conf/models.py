@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy import Column, Date, ForeignKey, Integer, String
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 

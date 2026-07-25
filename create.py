@@ -1,14 +1,12 @@
+import socket
 import subprocess
 import sys
-import socket
-
-import my_select
-
-from seeds import seed_db
-
-from time import sleep
 from pathlib import Path
 from shutil import copy2
+from time import sleep
+
+import selects
+from seeds import seed_db
 
 DIR_END_ALEMBIC = Path(__file__).parent.joinpath("alembic")
 
@@ -111,7 +109,7 @@ def insert_db() -> None:
 
 def get_db() -> None:
     print("Запити до БД")
-    my_select.main()
+    selects.main()
 
 
 def result_err(err) -> None:

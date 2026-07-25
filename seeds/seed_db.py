@@ -1,12 +1,12 @@
+from datetime import date
 from random import randint
 
-from .fake_data import fake
 from sqlalchemy.exc import SQLAlchemyError
 
 from conf.db import session
-from conf.models import Group, Student, Teacher, Subject, Grade
+from conf.models import Grade, Group, Student, Subject, Teacher
 
-from datetime import date
+from .fake_data import fake
 
 GROUPS = 3
 STUDENTS = randint(30, 50)
