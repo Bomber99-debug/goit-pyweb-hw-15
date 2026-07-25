@@ -223,4 +223,3 @@ log_file.txt
 logging.log
 alembic/
 alembic.ini
-config.py
