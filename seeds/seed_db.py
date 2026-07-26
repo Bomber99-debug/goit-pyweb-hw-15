@@ -169,7 +169,7 @@ def insert_grades() -> None:
     num = 0
     students = session.query(Student).all()
 
-    for _ in range(3):
+    for _ in range(2):
         for number, student in enumerate(students):
             grade = Grade(
                 student_id=number + 1,
