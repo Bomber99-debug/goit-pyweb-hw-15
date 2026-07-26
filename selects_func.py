@@ -351,7 +351,7 @@ def select_12(group_id: int = 2, subject_id: int = 4) -> None:
 def list_groups():
     groups = session.query(Group.group_title).all()
     for group in groups:
-        print(group.fullname)
+        print(group.group_title)
 
 
 def list_students():
