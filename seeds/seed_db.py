@@ -169,10 +169,11 @@ def insert_grades() -> None:
     num = 0
     students = session.query(Student).all()
 
-    for _ in range(2):
-        for number, student in enumerate(students):
+
+    for number, student in enumerate(students):
+        for _ in range(20):
             grade = Grade(
-                student_id=number + 1,
+                student_id=student.id,
                 subject_id=randint(1, SUBJECTS),
                 grade=randint(1, 12),
                 date=fake.date_between(start_date='-5y')

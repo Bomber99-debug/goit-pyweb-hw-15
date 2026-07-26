@@ -1,23 +1,11 @@
 from argparse import ArgumentParser, Namespace
+
 from cli_parser import build_parser
-from selects_files import (
-    select_01,
-    select_02,
-    select_03,
-    select_04,
-    select_05,
-    select_06,
-    select_07,
-    select_08,
-    select_09,
-    select_10,
-    select_11,
-    select_12,
-)
+
 
 def dispatch_command(arguments: Namespace, parser: ArgumentParser) -> None:
     import create
-    import selects_files
+    import selects_func
 
     if arguments.auto:
         print("Запуск повного сценарію проєкту...")
@@ -49,51 +37,51 @@ def dispatch_command(arguments: Namespace, parser: ArgumentParser) -> None:
 
     elif arguments.student_max_avg_grade:
         print("Вибірка: 5 студентів із найбільшим середнім балом.")
-        select_01.get_student_max_avg_grade()
+        selects_func.select_01()
 
     elif arguments.student_subject_avg_grade:
         print("Вибірка: студент із найвищим середнім балом з предмета.")
-        select_02.get_student_subject_avg_grade()
+        selects_func.select_02()
 
     elif arguments.group_subject_avg_grade:
         print("Вибірка: середній бал у групах з предмета.")
-        select_03.get_group_subject_avg_grade()
+        selects_func.select_03()
 
     elif arguments.avg_grade:
         print("Вибірка: середній бал на потоці.")
-        select_04.get_avg_grade()
+        selects_func.select_04()
 
     elif arguments.teacher_subject:
         print("Вибірка: предмети певного викладача.")
-        select_05.get_teacher_subject()
+        selects_func.select_05()
 
     elif arguments.student_group:
         print("Вибірка: студенти певної групи.")
-        select_06.get_student_group()
+        selects_func.select_06()
 
     elif arguments.group_student_subject_grade:
         print("Вибірка: оцінки студентів групи з предмета.")
-        select_07.get_group_student_subject_grade()
+        selects_func.select_07()
 
     elif arguments.teacher_subject_avg_grade:
         print("Вибірка: середній бал викладача з його предметів.")
-        select_08.get_teacher_subject_avg_grade()
+        selects_func.select_08()
 
     elif arguments.student_subject:
         print("Вибірка: предмети певного студента.")
-        select_09.get_student_subject()
+        selects_func.select_09()
 
     elif arguments.student_subject_teacher:
         print("Вибірка: предмети студента у певного викладача.")
-        select_10.get_student_subject_teacher()
+        selects_func.select_10()
 
     elif arguments.teacher_avg_grade:
         print("Вибірка: середній бал викладача певному студенту.")
-        select_11.get_student_teacher_avg_grade()
+        selects_func.select_11()
 
     elif arguments.group_student_subject_date:
         print("Вибірка: оцінки групи з предмета на останньому занятті.")
-        select_12.get_group_student_subject_date()
+        selects_func.select_12()
 
     elif arguments.entity is not None:
         from seeds import seed_db
@@ -146,8 +134,7 @@ def dispatch_command(arguments: Namespace, parser: ArgumentParser) -> None:
 
             case ("teacher", "create"):
                 print(
-                    f"Створення викладача: "
-                    f"{arguments.first_name} {arguments.last_name}"
+                    f"Створення викладача: {arguments.first_name} {arguments.last_name}"
                 )
                 seed_db.create_teacher(arguments.first_name, arguments.last_name)
 
