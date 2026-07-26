@@ -3,6 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 from shutil import copy2
+from subprocess import CompletedProcess
 from time import sleep
 
 import selects
@@ -22,7 +23,7 @@ def docker_init() -> None:
         print(f"Docker встановлено, але сталася помилка при виконанні: {e.stderr}")
 
 
-def is_port_busy(host='localhost', port=5432) -> bool:
+def is_port_busy(host="localhost", port=5432) -> bool:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.bind((host, port))
@@ -31,13 +32,23 @@ def is_port_busy(host='localhost', port=5432) -> bool:
         return False
 
 
-def docker_create_container(container_name: str = 'dev-pyweb-15') -> None:
+def docker_create_container(container_name: str = "dev-pyweb-15") -> None:
     docker_init()  # Перевірка чи встановлений Docker і запущений
 
     print("Створення контейнера")
     file_name_db = subprocess.run(
-        ['docker', 'ps', '-a', '--filter', f'name={container_name}', '--format', '{{.Names}}'],
-        capture_output=True, text=True)
+        [
+            "docker",
+            "ps",
+            "-a",
+            "--filter",
+            f"name={container_name}",
+            "--format",
+            "{{.Names}}",
+        ],
+        capture_output=True,
+        text=True,
+    )
 
     if container_name in file_name_db.stdout.splitlines():
         print(f"Контейнер з {container_name} вже існує, задайте іншу назву")
@@ -49,30 +60,38 @@ def docker_create_container(container_name: str = 'dev-pyweb-15') -> None:
         sleep(1)
         sys.exit()
 
-    create = ["docker", "run", "--name", container_name,
-              "-e", "POSTGRES_USER=dev_pyweb",
-              "-e", "POSTGRES_PASSWORD=123456",
-              "-e", "POSTGRES_DB=dev_pyweb",
-              "-p", "5432:5432",
-              "-d", "postgres:16"]
-    result = subprocess.run(create, capture_output=True, text=True)
+    create = [
+        "docker",
+        "run",
+        "--name",
+        container_name,
+        "-e",
+        "POSTGRES_USER=dev_pyweb",
+        "-e",
+        "POSTGRES_PASSWORD=123456",
+        "-e",
+        "POSTGRES_DB=dev_pyweb",
+        "-p",
+        "5432:5432",
+        "-d",
+        "postgres:16",
+    ]
+    result = subprocess.run(create, capture_output=True, text=True)  # noqa: PLW1510
     result_err(result)
 
 
 def init_alembic() -> bool:
-    result = subprocess.run(['alembic', 'history'], capture_output=True, text=True)
-    if result.returncode == 0:
-        return False
-    return True
+    result = subprocess.run(["alembic", "history"], capture_output=True, text=True)  # noqa: PLW1510
+    return result.returncode != 0
 
 
 def edit_setting_alembic(dir_file: Path) -> None:
     try:
-        source = Path(__file__).parent.joinpath('setting').joinpath('env.py')
+        source = Path(__file__).parent.joinpath("setting").joinpath("env.py")
         copy2(source, dir_file)
-    except FileNotFoundError as err:
+    except FileNotFoundError:
         print("Файл env.py не знайдено.")
-    except PermissionError as err:
+    except PermissionError:
         print("Файл env.py заблокований або не має прав на копіювання і переміщення.")
     except OSError as err:
         print(err)
@@ -80,25 +99,69 @@ def edit_setting_alembic(dir_file: Path) -> None:
 
 def init_migrate_db(dir_end: Path = DIR_END_ALEMBIC) -> None:
     print("Створення міграції у базі даних")
-    destination = Path(__file__).parent.joinpath(dir_end).joinpath('env.py')
+    destination = Path(__file__).parent.joinpath(dir_end).joinpath("env.py")
     if not destination.exists():
-        print('Ініціалізація alembic')
-        result = subprocess.run(['alembic', 'init', dir_end], capture_output=True, text=True)
+        print("Ініціалізація alembic")
+        result = subprocess.run(  # noqa: PLW1510
+            ["alembic", "init", dir_end], capture_output=True, text=True
+        )
         result_err(result)
 
-        print('Заміна налаштувань alembic')
+        print("Заміна налаштувань alembic")
         edit_setting_alembic(destination)
 
 
-def create_migrate_db():
-    print('Створення міграцій')
-    result = subprocess.run(['alembic', 'revision', '--autogenerate', '-m', "'Init'"], capture_output=True, text=True)
+def check_postgres_ready(
+    container_name: str = "dev-pyweb-15",
+) -> CompletedProcess[str]:
+    return subprocess.run(
+        [
+            "docker",
+            "exec",
+            container_name,
+            "pg_isready",
+            "-U",
+            "dev_pyweb",
+            "-d",
+            "dev_pyweb",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def create_migrate_db() -> None:
+    print("Створення міграції")
+
+    while True:
+        postgres_status = check_postgres_ready()
+
+        if postgres_status.returncode != 0:
+            print("PostgreSQL ще не готовий")
+            sleep(5)
+            continue
+
+        # Міграція створюється лише після готовності PostgreSQL.
+        result = subprocess.run(
+            ["alembic", "revision", "--autogenerate", "-m", "Init"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        break
+
     result_err(result)
 
 
 def application_migrate_db():
-    print('Застосування міграції')
-    result = subprocess.run(['alembic', 'upgrade', 'head'], capture_output=True, text=True)
+    print("Застосування міграції")
+    result = subprocess.run(  # noqa: PLW1510
+        ["alembic", "upgrade", "head"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
     result_err(result)
 
 
@@ -134,5 +197,5 @@ def main() -> None:
     get_db()  # Запити до БД
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

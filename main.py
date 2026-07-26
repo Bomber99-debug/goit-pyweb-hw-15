@@ -1,4 +1,5 @@
 from argparse import ArgumentParser, Namespace
+from time import sleep
 
 from cli_parser import build_parser
 
