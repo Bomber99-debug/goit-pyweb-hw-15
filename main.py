@@ -215,9 +215,6 @@ def dispatch_command(arguments: Namespace, parser: ArgumentParser) -> None:
                     arguments.grade_date,
                 )
 
-            case ("grade", "list"):
-                selects_func.list_grades()
-
             case _:
                 parser.print_help()
 

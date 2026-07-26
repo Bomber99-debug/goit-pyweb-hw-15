@@ -349,42 +349,24 @@ def select_12(group_id: int = 2, subject_id: int = 4) -> None:
 
 
 def list_groups():
-    avg_grade = func.round(func.avg(Grade.grade), 2).label("avg_grade")
-
-    students = (
-        session.query(Student.fullname, avg_grade)
-        .order_by(avg_grade.desc())
-        .join(Grade)
-        .group_by(Student.id, Student.fullname)
-        .limit(5)
-    )
-
-    output = f"{'fullname':<24} | {'avg grade'}\n{'-' * 38}\n"
-    for student in students:
-        output += f"{student.fullname:<24} | {student.avg_grade}\n"
-
-    print(output)
+    groups = session.query(Group.group_title).all()
+    for group in groups:
+        print(group.fullname)
 
 
 def list_students():
-    students = session.query(Student.fullname).all()
+    students = session.query(Student).all()
     for student in students:
-        print(student.fullname)
+        print(f"{student.first_name} {student.last_name}")
 
 
 def list_teachers():
-    teachers = session.query(Teacher.fullname).all()
+    teachers = session.query(Teacher).all()
     for teacher in teachers:
-        print(teacher.fullname)
+        print(f"{teacher.first_name} {teacher.last_name}")
 
 
 def list_subjects():
-    subjects = session.query(Subject.fullname).all()
+    subjects = session.query(Subject.title).all()
     for subject in subjects:
-        print(subject.fullname)
-
-
-def list_grades():
-    grades = session.query(Grade.fullname).all()
-    for grade in grades:
-        print(grade.fullname)
+        print(subject.title)
