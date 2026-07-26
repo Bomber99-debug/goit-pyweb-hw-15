@@ -9,6 +9,14 @@ PROGRAM_DESCRIPTION = (
     "та CRUD-операціями над моделями бази даних."
 )
 
+PROGRAM_EPILOG = """
+Приклади CRUD-команд:
+  py main.py -a create -m Teacher -n "Boris Jonson"
+  py main.py -a update -m Teacher --id 3 -n "Andry Bezos"
+  py main.py -a remove -m Teacher --id 3
+  py main.py -a create -m Group -n "AD-101"
+"""
+
 
 # Команди підготовки та запуску проєкту
 # ---------------------------------------------------------------------

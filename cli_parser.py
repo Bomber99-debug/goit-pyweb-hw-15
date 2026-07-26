@@ -1,7 +1,12 @@
 import argparse
+from datetime import date
 
 from cli_help import (
     ACTION_HELP,
+    AUTO_HELP,
+    CONTAINER_NAME,
+    CREATE_MIGRATION_HELP,
+    EDIT_ALEMBIC_HELP,
     GRADE_CREATE_HELP,
     GRADE_DATE_HELP,
     GRADE_DELETE_HELP,
@@ -14,10 +19,14 @@ from cli_help import (
     GROUP_HELP,
     GROUP_ID_HELP,
     ID_HELP,
+    INIT_DOCKER_HELP,
+    INSERT_DB_HELP,
     MODEL_HELP,
     NAME_HELP,
     PROGRAM_DESCRIPTION,
+    PROGRAM_EPILOG,
     PROGRAM_NAME,
+    RUN_QUERIES_HELP,
     SELECT_AVG_GRADE,
     SELECT_GROUP_STUDENT_SUBJECT_DATE,
     SELECT_GROUP_STUDENT_SUBJECT_GRADE,
@@ -47,15 +56,18 @@ from cli_help import (
     TEACHER_EDIT_HELP,
     TEACHER_HELP,
     TEACHER_ID_HELP,
+    UPGRADE_DB_HELP,
 )
 
 
 def normalize_model(value: str) -> str:
     """
-    Перетворює назву моделі з формату Teacher у внутрішній формат teacher.
+    Перетворює назву моделі з формату Teacher
+    у внутрішній формат teacher.
     """
 
     model = value.strip().lower()
+
     available_models = {
         "group",
         "student",
@@ -66,6 +78,7 @@ def normalize_model(value: str) -> str:
 
     if model not in available_models:
         available = ", ".join(sorted(available_models))
+
         raise argparse.ArgumentTypeError(
             f"Невідома модель: {value}. Доступні моделі: {available}"
         )
@@ -93,6 +106,7 @@ def normalize_action(value: str) -> str:
 
     if action not in actions:
         available = "create, list, update, remove"
+
         raise argparse.ArgumentTypeError(
             f"Невідома операція: {value}. Доступні операції: {available}"
         )
@@ -105,7 +119,8 @@ class NameAction(argparse.Action):
     Обробляє універсальний аргумент --name.
 
     Для Group і Subject повне значення використовується як title.
-    Для Student і Teacher значення розділяється на first_name та last_name.
+    Для Student і Teacher значення розділяється
+    на first_name та last_name.
     """
 
     def __call__(
@@ -116,6 +131,13 @@ class NameAction(argparse.Action):
         option_string: str | None = None,
     ) -> None:
         full_name = values.strip()
+
+        if not full_name:
+            raise argparse.ArgumentError(
+                self,
+                "Значення --name не може бути порожнім.",
+            )
+
         name_parts = full_name.split(maxsplit=1)
 
         first_name = name_parts[0]
@@ -131,8 +153,73 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog=PROGRAM_NAME,
         description=PROGRAM_DESCRIPTION,
+        epilog=PROGRAM_EPILOG,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
+    # Команди підготовки та запуску проєкту
+    # ---------------------------------------------------------------------
+    parser.add_argument(
+        "-A",
+        "--auto",
+        action="store_true",
+        help=AUTO_HELP,
+    )
+
+    parser.add_argument(
+        "-D",
+        "--init-docker",
+        action="store_true",
+        help=INIT_DOCKER_HELP,
+    )
+
+    parser.add_argument(
+        "-C",
+        "--container-name",
+        type=str,
+        default="dev-pyweb-15",
+        help=CONTAINER_NAME,
+    )
+
+    parser.add_argument(
+        "-E",
+        "--edit-alembic",
+        action="store_true",
+        help=EDIT_ALEMBIC_HELP,
+    )
+
+    parser.add_argument(
+        "-M",
+        "--create-migration",
+        action="store_true",
+        help=CREATE_MIGRATION_HELP,
+    )
+
+    parser.add_argument(
+        "-U",
+        "--upgrade-db",
+        action="store_true",
+        help=UPGRADE_DB_HELP,
+    )
+
+    parser.add_argument(
+        "-I",
+        "--insert-db",
+        action="store_true",
+        help=INSERT_DB_HELP,
+    )
+
+    parser.add_argument(
+        "-Q",
+        "--run-queries",
+        action="store_true",
+        help=RUN_QUERIES_HELP,
+    )
+
+    # CRUD у форматі, який вимагається в домашньому завданні.
+    # ---------------------------------------------------------------------
+    # Приклад:
+    # py main.py --action create --model Teacher --name "Boris Jonson"
     parser.add_argument(
         "-a",
         "--action",
@@ -195,76 +282,13 @@ def build_parser() -> argparse.ArgumentParser:
         "--date",
         "--grade-date",
         dest="grade_date",
-        type=str,
+        type=date.fromisoformat,
         help=GRADE_DATE_HELP,
     )
 
-    # CRUD у форматі, який вимагається в домашньому завданні.
-    # ---------------------------------------------------------------------
-    # Приклад:
-    # py main.py --action create --model Teacher --name "Boris Jonson"
-
-    parser.add_argument(
-        "-a",
-        "--action",
-        type=normalize_action,
-        help="CRUD-операція: create, list, update або remove.",
-    )
-    parser.add_argument(
-        "-m",
-        "--model",
-        dest="entity",
-        type=normalize_model,
-        help="Модель: Group, Student, Teacher, Subject або Grade.",
-    )
-    parser.add_argument(
-        "-n",
-        "--name",
-        action=NameAction,
-        help="Назва групи, предмета або ім'я та прізвище людини.",
-    )
-    parser.add_argument(
-        "--id",
-        type=int,
-        help="ID запису для update або remove.",
-    )
-    parser.add_argument(
-        "--group-id",
-        type=int,
-        help="ID групи студента.",
-    )
-    parser.add_argument(
-        "--teacher-id",
-        type=int,
-        help="ID викладача предмета.",
-    )
-    parser.add_argument(
-        "--student-id",
-        type=int,
-        help="ID студента для оцінки.",
-    )
-    parser.add_argument(
-        "--subject-id",
-        type=int,
-        help="ID предмета для оцінки.",
-    )
-    parser.add_argument(
-        "--grade",
-        type=int,
-        help="Оцінка студента.",
-    )
-    parser.add_argument(
-        "--date",
-        "--grade-date",
-        dest="grade_date",
-        type=str,
-        help="Дата отримання оцінки.",
-    )
-
-    # Ці значення гарантують наявність атрибутів у Namespace,
-    # навіть якщо використовується формат --action/--model.
+    # Ці значення потрібні main.py
+    # для універсального CRUD-формату.
     parser.set_defaults(
-        name=None,
         title=None,
         first_name=None,
         last_name=None,
@@ -281,6 +305,7 @@ def build_parser() -> argparse.ArgumentParser:
         "group",
         help=GROUP_HELP,
     )
+
     group_actions = group_parser.add_subparsers(
         dest="action",
         required=True,
@@ -322,6 +347,7 @@ def build_parser() -> argparse.ArgumentParser:
         "student",
         help=STUDENT_HELP,
     )
+
     student_actions = student_parser.add_subparsers(
         dest="action",
         required=True,
@@ -388,6 +414,7 @@ def build_parser() -> argparse.ArgumentParser:
         "teacher",
         help=TEACHER_HELP,
     )
+
     teacher_actions = teacher_parser.add_subparsers(
         dest="action",
         required=True,
@@ -437,6 +464,7 @@ def build_parser() -> argparse.ArgumentParser:
         "subject",
         help=SUBJECT_HELP,
     )
+
     subject_actions = subject_parser.add_subparsers(
         dest="action",
         required=True,
@@ -495,6 +523,7 @@ def build_parser() -> argparse.ArgumentParser:
         "grade",
         help=GRADE_HELP,
     )
+
     grade_actions = grade_parser.add_subparsers(
         dest="action",
         required=True,
@@ -518,7 +547,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     create_grade.add_argument(
         "grade_date",
-        type=str,
+        type=date.fromisoformat,
     )
 
     delete_grade = grade_actions.add_parser(
@@ -544,7 +573,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     edit_grade.add_argument(
         "grade_date",
-        type=str,
+        type=date.fromisoformat,
     )
 
     # Select
@@ -552,84 +581,108 @@ def build_parser() -> argparse.ArgumentParser:
 
     # Знайти 5 студентів із найбільшим середнім балом з усіх предметів.
     parser.add_argument(
+        "--student-max-avg-grade",
         "--student_max_avg_grade",
+        dest="student_max_avg_grade",
         action="store_true",
         help=SELECT_STUDENT_MAX_AVG_GRADE,
     )
 
     # Знайти студента із найвищим середнім балом з певного предмета.
     parser.add_argument(
+        "--student-subject-avg-grade",
         "--student_subject_avg_grade",
+        dest="student_subject_avg_grade",
         action="store_true",
         help=SELECT_STUDENT_SUBJECT_AVG_GRADE,
     )
 
     # Знайти середній бал у групах з певного предмета.
     parser.add_argument(
+        "--group-subject-avg-grade",
         "--group_subject_avg_grade",
+        dest="group_subject_avg_grade",
         action="store_true",
         help=SELECT_GROUP_SUBJECT_AVG_GRADE,
     )
 
     # Знайти середній бал на потоці (по всій таблиці оцінок).
     parser.add_argument(
+        "--avg-grade",
         "--avg_grade",
+        dest="avg_grade",
         action="store_true",
         help=SELECT_AVG_GRADE,
     )
 
     # Знайти які курси читає певний викладач.
     parser.add_argument(
+        "--teacher-subject",
         "--teacher_subject",
+        dest="teacher_subject",
         action="store_true",
         help=SELECT_TEACHER_SUBJECT,
     )
 
     # Знайти список студентів у певній групі.
     parser.add_argument(
+        "--student-group",
         "--student_group",
+        dest="student_group",
         action="store_true",
         help=SELECT_STUDENT_GROUP,
     )
 
     # Знайти оцінки студентів у окремій групі з певного предмета.
     parser.add_argument(
+        "--group-student-subject-grade",
         "--group_student_subject_grade",
+        dest="group_student_subject_grade",
         action="store_true",
         help=SELECT_GROUP_STUDENT_SUBJECT_GRADE,
     )
 
     # Знайти середній бал, який ставить певний викладач зі своїх предметів.
     parser.add_argument(
+        "--teacher-subject-avg-grade",
         "--teacher_subject_avg_grade",
+        dest="teacher_subject_avg_grade",
         action="store_true",
         help=SELECT_TEACHER_SUBJECT_AVG_GRADE,
     )
 
     # Знайти список курсів, які відвідує певний студент.
     parser.add_argument(
+        "--student-subject",
         "--student_subject",
+        dest="student_subject",
         action="store_true",
         help=SELECT_STUDENT_SUBJECT,
     )
 
     # Список курсів, які певному студенту читає певний викладач.
     parser.add_argument(
+        "--student-subject-teacher",
         "--student_subject_teacher",
+        dest="student_subject_teacher",
         action="store_true",
         help=SELECT_STUDENT_SUBJECT_TEACHER,
     )
 
     # Середній бал, який певний викладач ставить певному студентові.
     parser.add_argument(
+        "--teacher-avg-grade",
         "--teacher_avg_grade",
+        dest="teacher_avg_grade",
         action="store_true",
         help=SELECT_TEACHER_AVG_GRADE,
     )
 
     # Оцінки студентів у певній групі з певного предмета на останньому занятті.
     parser.add_argument(
+        "--group-student-subject-date",
         "--group_student_subject_date",
+        dest="group_student_subject_date",
         action="store_true",
         help=SELECT_GROUP_STUDENT_SUBJECT_DATE,
     )

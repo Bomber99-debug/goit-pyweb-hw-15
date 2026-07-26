@@ -346,3 +346,45 @@ def select_12(group_id: int = 2, subject_id: int = 4) -> None:
         )
 
     print(output)
+
+
+def list_groups():
+    avg_grade = func.round(func.avg(Grade.grade), 2).label("avg_grade")
+
+    students = (
+        session.query(Student.fullname, avg_grade)
+        .order_by(avg_grade.desc())
+        .join(Grade)
+        .group_by(Student.id, Student.fullname)
+        .limit(5)
+    )
+
+    output = f"{'fullname':<24} | {'avg grade'}\n{'-' * 38}\n"
+    for student in students:
+        output += f"{student.fullname:<24} | {student.avg_grade}\n"
+
+    print(output)
+
+
+def list_students():
+    students = session.query(Student.fullname).all()
+    for student in students:
+        print(student.fullname)
+
+
+def list_teachers():
+    teachers = session.query(Teacher.fullname).all()
+    for teacher in teachers:
+        print(teacher.fullname)
+
+
+def list_subjects():
+    subjects = session.query(Subject.fullname).all()
+    for subject in subjects:
+        print(subject.fullname)
+
+
+def list_grades():
+    grades = session.query(Grade.fullname).all()
+    for grade in grades:
+        print(grade.fullname)

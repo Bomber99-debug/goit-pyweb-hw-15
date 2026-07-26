@@ -89,6 +89,7 @@ def dispatch_command(arguments: Namespace, parser: ArgumentParser) -> None:
         entity, action = arguments.entity, arguments.action
 
         match (entity, action):
+            # --------------- Goup --------------------
             case ("group", "create"):
                 print(f"Створення групи: {arguments.title}")
                 seed_db.create_group(arguments.title)
@@ -101,6 +102,10 @@ def dispatch_command(arguments: Namespace, parser: ArgumentParser) -> None:
                 print(f"Оновлення групи з ID: {arguments.id}")
                 seed_db.update_group(arguments.id, arguments.title)
 
+            case ("group", "list"):
+                selects_func.list_groups()
+            
+            # --------------- Student --------------------
             case ("student", "create"):
                 print(
                     f"Створення студента: "
@@ -132,6 +137,10 @@ def dispatch_command(arguments: Namespace, parser: ArgumentParser) -> None:
                 )
                 seed_db.update_group_student(arguments.group_id, arguments.id)
 
+            case ("student", "list"):
+                selects_func.list_students()
+
+            # --------------- Teacher --------------------
             case ("teacher", "create"):
                 print(
                     f"Створення викладача: {arguments.first_name} {arguments.last_name}"
@@ -150,6 +159,10 @@ def dispatch_command(arguments: Namespace, parser: ArgumentParser) -> None:
                     arguments.id,
                 )
 
+            case ("teacher", "list"):
+                selects_func.list_teachers()
+                
+            # --------------- Subject --------------------
             case ("subject", "create"):
                 print(
                     f"Створення предмета: {arguments.title}, "
@@ -172,6 +185,10 @@ def dispatch_command(arguments: Namespace, parser: ArgumentParser) -> None:
                 )
                 seed_db.update_teacher_subject(arguments.teacher_id, arguments.id)
 
+            case ("subject", "list"):
+                selects_func.list_subjects()
+
+            # --------------- Grade --------------------
             case ("grade", "create"):
                 print(
                     f"Створення оцінки: student_id={arguments.student_id}, "
@@ -197,6 +214,9 @@ def dispatch_command(arguments: Namespace, parser: ArgumentParser) -> None:
                     arguments.grade,
                     arguments.grade_date,
                 )
+
+            case ("grade", "list"):
+                selects_func.list_grades()
 
             case _:
                 parser.print_help()
