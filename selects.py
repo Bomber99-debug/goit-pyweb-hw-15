@@ -3,31 +3,31 @@ import selects_func
 
 def main():
     print("1. Знайти 5 студентів із найбільшим середнім балом з усіх предметів.")
-    selects_func.select_01()
+    selects_func.select_1()
 
     print("2. Знайти студента із найвищим середнім балом з певного предмета.")
-    selects_func.select_02()
+    selects_func.select_2()
 
     print("3. Знайти середній бал у групах з певного предмета.")
-    selects_func.select_03()
+    selects_func.select_3()
 
     print("4. Знайти середній бал на потоці (по всій таблиці оцінок).")
-    selects_func.select_04()
+    selects_func.select_4()
 
     print("5. Знайти які курси читає певний викладач.")
-    selects_func.select_05()
+    selects_func.select_5()
 
     print("6. Знайти список студентів у певній групі.")
-    selects_func.select_06()
+    selects_func.select_6()
 
     print("7. Знайти оцінки студентів у окремій групі з певного предмета.")
-    selects_func.select_07()
+    selects_func.select_7()
 
     print("8. Знайти середній бал, який ставить певний викладач зі своїх предметів.")
-    selects_func.select_08()
+    selects_func.select_8()
 
     print("9. Знайти список курсів, які відвідує певний студент.")
-    selects_func.select_09()
+    selects_func.select_9()
 
     print("10. Список курсів, які певному студенту читає певний викладач.")
     selects_func.select_10()

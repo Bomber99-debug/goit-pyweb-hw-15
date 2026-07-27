@@ -1,11 +1,11 @@
-from sqlalchemy import and_, func
+from sqlalchemy import and_, func, distinct
 
 from conf.db import session
 from conf.models import Grade, Group, Student, Subject, Teacher
 
 
 # Знайти 5 студентів із найбільшим середнім балом з усіх предметів.
-def select_01() -> None:
+def select_1() -> None:
     avg_grade = func.round(func.avg(Grade.grade), 2).label("avg_grade")
 
     students = (
@@ -24,7 +24,7 @@ def select_01() -> None:
 
 
 # Знайти студента із найвищим середнім балом з певного предмета.
-def select_02(subject_id: int = 3) -> None:
+def select_2(subject_id: int = 3) -> None:
     avg_grade = func.round(func.avg(Grade.grade), 2).label("avg_grade")
 
     subquery = (
@@ -61,7 +61,7 @@ def select_02(subject_id: int = 3) -> None:
 
 
 # Знайти середній бал у групах з певного предмета.
-def select_03(subject_id: int = 3) -> None:
+def select_3(subject_id: int = 3) -> None:
     avg_grade = func.round(func.avg(Grade.grade), 2).label("avg_grade")
 
     subquery = (
@@ -94,7 +94,7 @@ def select_03(subject_id: int = 3) -> None:
 
 
 # Знайти середній бал на потоці (по всій таблиці оцінок).
-def select_04() -> None:
+def select_4() -> None:
     avg_grade = (
         session.query(func.round(func.avg(Grade.grade), 2)).select_from(Grade).scalar()
     )
@@ -103,7 +103,7 @@ def select_04() -> None:
 
 
 # Знайти які курси читає певний викладач.
-def select_05(teacher_id: int = 3) -> None:
+def select_5(teacher_id: int = 3) -> None:
     teacher_subjects = (
         session.query(
             Teacher.id.label("teacher_id"),
@@ -125,7 +125,7 @@ def select_05(teacher_id: int = 3) -> None:
 
 
 # Знайти список студентів у певній групі.
-def select_06(group_id: int = 2) -> None:
+def select_6(group_id: int = 2) -> None:
     students = (
         session.query(
             Student.id.label("student_id"),
@@ -147,7 +147,7 @@ def select_06(group_id: int = 2) -> None:
 
 
 # Знайти оцінки студентів у окремій групі з певного предмета.
-def select_07(group_id: int = 2, subject_id: int = 3) -> None:
+def select_7(group_id: int = 2, subject_id: int = 3) -> None:
     students = (
         session.query(
             Group.id.label("group_id"),
@@ -164,6 +164,7 @@ def select_07(group_id: int = 2, subject_id: int = 3) -> None:
         .join(Grade)
         .join(Subject)
         .filter(and_(Group.id == group_id), Subject.id == subject_id)
+        .distinct()
         .all()
     )
 
@@ -182,36 +183,33 @@ def select_07(group_id: int = 2, subject_id: int = 3) -> None:
 
 
 # Знайти середній бал, який ставить певний викладач зі своїх предметів.
-def select_08(teacher_id: int = 3) -> None:
+def select_8(teacher_id: int = 3) -> None:
     avg_grade = func.round(func.avg(Grade.grade), 2).label("avg_grade")
 
     teacher_subjects = (
         session.query(
             Teacher.id.label("teacher_id"),
             Teacher.fullname,
-            Subject.id.label("subject_id"),
-            Subject.title,
             avg_grade,
         )
         .select_from(Teacher)
         .join(Subject)
         .join(Grade)
-        .group_by(Teacher.id, Teacher.fullname, Subject.id, Subject.title)
+        .group_by(Teacher.id, Teacher.fullname)
         .filter(Teacher.id == teacher_id)
         .all()
     )
 
-    output = f"{'teacher':<24} | {'subject':<26} | {'avg grade'}\n{'-' * 68}\n"
+    output = f"{'teacher':<24} | {'avg grade'}\n{'-' * 68}\n"
     for subject in teacher_subjects:
         output += (
-            f"{subject.fullname:<24} | {subject.title:<26} | {subject.avg_grade}\n"
+            f"{subject.fullname:<24} | {subject.avg_grade}\n"
         )
 
     print(output)
 
-
 # Знайти список курсів, які відвідує певний студент.
-def select_09(student_id: int = 15) -> None:
+def select_9(student_id: int = 15) -> None:
     student_subjects = (
         session.query(
             Student.id.label("student_id"),
@@ -223,6 +221,7 @@ def select_09(student_id: int = 15) -> None:
         .join(Student)
         .join(Subject)
         .filter(Student.id == student_id)
+        .distinct()
         .all()
     )
 
@@ -249,6 +248,7 @@ def select_10(student_id: int = 15, teacher_id: int = 3) -> None:
         .join(Subject)
         .join(Teacher)
         .filter(and_(Teacher.id == teacher_id), Student.id == student_id)
+        .distinct()
         .all()
     )
 
